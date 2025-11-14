@@ -17,4 +17,4 @@ Highly valuable Underwriters and Agents, the Subject Matter Experts who possess 
 
 Coming Soon
 
-### Developlment is taking place in a private repository, this repo is just for visibility and wiki releases
+### *Development is taking place in a private repository, this repo is just for visibility and wiki releases*
