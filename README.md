@@ -10,7 +10,7 @@ Highly valuable Underwriters and Agents, the Subject Matter Experts who possess 
 - The first truly no-code, cloud-native rating engine built for insurers, MGAs, and brokers.
 - Drag-and-drop rule builder — no developers required.
 - Real-time sandbox testing and instant deployment.
-- Auto-generated APIs for brokers and aggregators.
+- Auto-generated APIs endpoints.
 - Full audit trail and versioning for compliance.
 
 ## Examples
