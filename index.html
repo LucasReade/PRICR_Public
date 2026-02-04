@@ -457,15 +457,15 @@
 
     <div class="container">
         <div class="logo"><img src="assets/PRICR_Text_Logo_Light.png" alt="PRICR Logo"></div>
-        <div class="tagline">Visual Ratings Builder Platform</div>
+        <div class="tagline">Visual Insurance Ratings Builder Platform</div>
         
         <h1 class="hero-text">
             Build <span class="gradient-text">Powerful</span><br>
-            Ratings <span class="highlight">Visually</span>
+            Insurance Ratings <span class="highlight">Visually</span>
         </h1>
         
         <p class="description">
-            Join the waitlist for the most intuitive ratings builder tool. 
+            Join the waitlist for the most intuitive insurance ratings builder tool. 
             Drag, drop, and quote - no code required.
         </p>
 
@@ -553,23 +553,38 @@
             submitBtn.textContent = 'Joining...';
 
             // Simulate API call
-            setTimeout(() => {
-                // Show success modal
-                successModal.classList.add('show');
-                
-                // Trigger confetti
-                createConfetti();
-                
+            const apiUri = 'https://script.google.com/macros/s/AKfycbzg890P1isxFpSuthVHji9rF01cKLgHxXBYoZIAng4tAyIUPWRjIevHd8nv4eDT8mCh/exec';
+
+            const formData = new FormData();
+
+            formData.append('email-address', email);
+            formData.append('timestamp', new Date().toISOString());
+
+            fetch(apiUri, {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    // success: show message, redirect, confetti, etc.
+                    // Show success modal
+                    successModal.classList.add('show');
+                    
+                    // Trigger confetti
+                    createConfetti();
+                } else {
+                    console.error("Something went wrong. Try again.");
+                }
+            })
+            .catch(err => {
+                console.error("Network error: " + err.message);
+            }).finally(() => {
                 // Reset form
                 emailInput.value = '';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Join the Waitlist';
+            });
 
-                // Optional: Redirect after delay
-                // setTimeout(() => {
-                //     window.location.href = '/welcome';
-                // }, 3000);
-            }, 1000);
         });
 
         // Remove error on input
