@@ -502,17 +502,64 @@
 
         <form class="waitlist-form" id="waitlistForm">
             <div class="input-wrapper">
+                <input
+                    type="text"
+                    class="email-input"
+                    id="nameInput"
+                    placeholder="Full name (required)"
+                    required
+                >
+                <div class="error-message" id="nameError">Please enter your full name</div>
+            </div>
+
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    class="email-input"
+                    id="companyInput"
+                    placeholder="Company / Organization (required)"
+                    required
+                >
+                <div class="error-message" id="companyError">Please enter your company or organization</div>
+            </div>
+
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    class="email-input"
+                    id="titleInput"
+                    placeholder="Job title / Role (optional)"
+                >
+            </div>
+
+            <div class="input-wrapper">
+                <select id="sizeSelect" class="email-input" aria-label="Company size">
+                    <option value="">Company size (optional)</option>
+                    <option value="1-10">1-10</option>
+                    <option value="11-50">11-50</option>
+                    <option value="51-200">51-200</option>
+                    <option value="201-1000">201-1,000</option>
+                    <option value="1000+">1,000+</option>
+                </select>
+            </div>
+
+            <div class="input-wrapper">
                 <input 
                     type="email" 
                     class="email-input" 
                     id="emailInput" 
-                    placeholder="Enter your email address"
+                    placeholder="Enter your email address (required)"
                     required
                 >
                 <div class="error-message" id="errorMessage">
                     Please enter a valid email address
                 </div>
             </div>
+
+            <!-- hidden tracking fields -->
+            <input type="hidden" id="utmInput" name="utm_source" value="">
+            <input type="hidden" id="referrerInput" name="referrer" value="">
+
             <button type="submit" class="submit-btn" id="submitBtn">
                 Join the Waitlist
             </button>
@@ -558,59 +605,111 @@
 
         // Form submissions
         const form = document.getElementById('waitlistForm');
+        const nameInput = document.getElementById('nameInput');
+        const companyInput = document.getElementById('companyInput');
+        const titleInput = document.getElementById('titleInput');
+        const sizeSelect = document.getElementById('sizeSelect');
         const emailInput = document.getElementById('emailInput');
+        const nameError = document.getElementById('nameError');
+        const companyError = document.getElementById('companyError');
         const errorMessage = document.getElementById('errorMessage');
         const submitBtn = document.getElementById('submitBtn');
         const successModal = document.getElementById('successModal');
+        const utmInput = document.getElementById('utmInput');
+        const referrerInput = document.getElementById('referrerInput');
+
+        // Populate hidden tracking fields
+        (function populateTracking() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const utm = params.get('utm_source') || params.get('utm') || '';
+                utmInput.value = utm;
+            } catch (e) {
+                utmInput.value = '';
+            }
+            referrerInput.value = document.referrer || '';
+        })();
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const email = emailInput.value.trim();
-            
+            const name = nameInput.value.trim();
+            const company = companyInput.value.trim();
+            const title = titleInput.value.trim();
+            const companySize = sizeSelect.value;
+
+            let hasError = false;
+
+            // Validate name
+            if (!name) {
+                nameInput.classList.add('error');
+                nameError.classList.add('show');
+                hasError = true;
+            } else {
+                nameInput.classList.remove('error');
+                nameError.classList.remove('show');
+            }
+
+            // Validate company
+            if (!company) {
+                companyInput.classList.add('error');
+                companyError.classList.add('show');
+                hasError = true;
+            } else {
+                companyInput.classList.remove('error');
+                companyError.classList.remove('show');
+            }
+
             // Validate email
             if (!isValidEmail(email)) {
                 emailInput.classList.add('error');
                 errorMessage.classList.add('show');
-                return;
+                hasError = true;
+            } else {
+                emailInput.classList.remove('error');
+                errorMessage.classList.remove('show');
             }
 
-            // Clear error state
-            emailInput.classList.remove('error');
-            errorMessage.classList.remove('show');
+            if (hasError) return;
 
             // Disable button
             submitBtn.disabled = true;
             submitBtn.textContent = 'Joining...';
 
-            // Simulate API call
             const apiUri = 'https://script.google.com/macros/s/AKfycbzg890P1isxFpSuthVHji9rF01cKLgHxXBYoZIAng4tAyIUPWRjIevHd8nv4eDT8mCh/exec';
 
             const formData = new FormData();
-
             formData.append('email-address', email);
+            formData.append('full-name', name);
+            formData.append('company', company);
+            formData.append('job-title', title);
+            formData.append('company-size', companySize);
+            formData.append('utm_source', utmInput.value || '');
+            formData.append('referrer', referrerInput.value || '');
             formData.append('timestamp', new Date().toISOString());
 
             fetch(apiUri, {
-                method: "POST",
+                method: 'POST',
                 body: formData
             })
             .then(response => {
                 if (response.ok) {
-                    // success: show message, redirect, confetti, etc.
-                    // Show success modal
                     successModal.classList.add('show');
-                    
-                    // Trigger confetti
                     createConfetti();
                 } else {
-                    console.error("Something went wrong. Try again.");
+                    console.error('Something went wrong. Try again.');
                 }
             })
             .catch(err => {
-                console.error("Network error: " + err.message);
-            }).finally(() => {
-                // Reset form
+                console.error('Network error: ' + err.message);
+            })
+            .finally(() => {
+                // Reset form fields
+                nameInput.value = '';
+                companyInput.value = '';
+                titleInput.value = '';
+                sizeSelect.value = '';
                 emailInput.value = '';
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Join the Waitlist';
@@ -618,12 +717,22 @@
 
         });
 
-        // Remove error on input
-        emailInput.addEventListener('input', function() {
-            if (emailInput.classList.contains('error')) {
-                emailInput.classList.remove('error');
-                errorMessage.classList.remove('show');
-            }
+        // Remove field errors on input
+        [nameInput, companyInput, emailInput].forEach(el => {
+            el.addEventListener('input', function() {
+                if (el.classList.contains('error')) {
+                    el.classList.remove('error');
+                }
+                if (el === emailInput) {
+                    errorMessage.classList.remove('show');
+                }
+                if (el === nameInput) {
+                    nameError.classList.remove('show');
+                }
+                if (el === companyInput) {
+                    companyError.classList.remove('show');
+                }
+            });
         });
 
         // Close modal
